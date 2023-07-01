@@ -303,12 +303,12 @@ function Main() {
       <div>{resultMessage}</div>
       <div className={showResult ? 'block' : 'hidden'}>
         {renderTSV?.map((el, index) => (
-          <div key={index} className="flex gap-2 border">
+          <div key={index} className="flex justify-around md:justify-normal gap-4 border">
             {el
               .split('\t')
               .filter((_, idx) => (justQuotes ? idx === 4 || idx === 5 : idx))
               .map((item, idx) => (
-                <div key={idx} className="w-1/6">
+                <div key={idx} className="w-1/6 border-r p-1">
                   {item}
                 </div>
               ))}
