@@ -28,6 +28,7 @@ function Main() {
   const [isCalculating, setIsCalculating] = useState(false)
   const [isDownloading, setIsDownloading] = useState(false)
   const [error, setError] = useState(null)
+  const [justQuotes, setJustQuotes] = useState(false)
   const getALLBooksTN = (bookName, tn, ol, gl) => {
     const tsvText = tn
     const targetUsfm = gl
@@ -80,31 +81,29 @@ function Main() {
         }
       } else {
         if (quote?.includes('…')) {
-         console.log(quote)
-         console.log(verseObjectsTargetString)
-         const wordsTargetObjects = selectionsFromQuoteAndString({
-           string: verseObjectsTargetString,
-           occurrence: 1,
-           quote,
-         })
-         for (const item of flatten) {
-           for (const word of item.words) {
-             if (
-               wordsTargetObjects
-                 .map((el) => JSON.stringify(el))
-                 .includes(JSON.stringify(word))
-             ) {
-               const content = item.content
-               greekSelections.push(
-                 content.map((el) => ({ ...el, reference: { chapter, verse } }))
-               )
-               break
-             }
-           }
-         }
+          console.log(quote)
+          console.log(verseObjectsTargetString)
+          const wordsTargetObjects = selectionsFromQuoteAndString({
+            string: verseObjectsTargetString,
+            occurrence: 1,
+            quote,
+          })
+          for (const item of flatten) {
+            for (const word of item.words) {
+              if (
+                wordsTargetObjects
+                  .map((el) => JSON.stringify(el))
+                  .includes(JSON.stringify(word))
+              ) {
+                const content = item.content
+                greekSelections.push(
+                  content.map((el) => ({ ...el, reference: { chapter, verse } }))
+                )
+                break
+              }
+            }
+          }
         }
-
-        
       }
       //5 этам - выравниваем полученный массив
 
@@ -188,11 +187,9 @@ function Main() {
       'all:' +
       (success + errors) +
       ' ' +
-      'persent:' +
+      'percent:' +
       Math.round((success / (success + errors)) * 100) +
-      '%' +
-      '...' +
-      threeDots +
+      '%' +      
       '\n'
     setResultMessage(resultMessage)
     return result.join('\n')
@@ -285,23 +282,36 @@ function Main() {
         >
           download
         </button>
-        <button
-          disabled={!finalTSV || isDownloading}
-          onClick={() => setShowResult((prev) => !prev)}
-          className=" w-fit p-2 rounded-xl bg-slate-200 hover:bg-white  disabled:text-gray-400 disabled:hover:bg-slate-200"
-        >
-          Show result
-        </button>
+        <div className="flex items-center gap-4">
+          <button
+            disabled={!finalTSV || isDownloading}
+            onClick={() => setShowResult((prev) => !prev)}
+            className=" w-fit p-2 rounded-xl bg-slate-200 hover:bg-white  disabled:text-gray-400 disabled:hover:bg-slate-200"
+          >
+            Show result
+          </button>
+          <div>Just quotes</div>
+          <input
+            type="checkbox"
+            value={justQuotes}
+            onChange={() => setJustQuotes((prev) => !prev)}
+            className="w-5 h-6"
+          />
+        </div>
       </div>
-      {isCalculating&&<div className='w-1/6 bg-gray-200 h-5 animate-pulse'></div>}<div>{resultMessage}</div>
+      {isCalculating && <div className="w-1/6 bg-gray-200 h-5 animate-pulse"></div>}
+      <div>{resultMessage}</div>
       <div className={showResult ? 'block' : 'hidden'}>
         {renderTSV?.map((el, index) => (
           <div key={index} className="flex gap-2 border">
-            {el.split('\t').map((item, idx) => (
-              <div key={idx} className="w-1/6">
-                {item}
-              </div>
-            ))}
+            {el
+              .split('\t')
+              .filter((_, idx) => (justQuotes ? idx === 4 || idx === 5 : idx))
+              .map((item, idx) => (
+                <div key={idx} className="w-1/6">
+                  {item}
+                </div>
+              ))}
           </div>
         ))}
       </div>
